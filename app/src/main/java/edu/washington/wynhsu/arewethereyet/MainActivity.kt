@@ -1,6 +1,5 @@
 package edu.washington.wynhsu.arewethereyet
 
-import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -21,7 +20,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         btnStart.setOnClickListener {
-            if (validate()) {
+            val btn = btnStart.text
+            if (validate() && btn == "Start") {
                 btnStart.text = "Stop"
                 val msg = txtMsg.text
                 val numb = txtPhone.text
@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent("edu.washington.wynhsu.arewethereyet").apply {
                     putExtra("message", toast)
                 }
-                val pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
+                val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
 
                 sendBroadcast(intent)
 
@@ -40,6 +40,9 @@ class MainActivity : AppCompatActivity() {
 
                 val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
                 alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + (count * 1000).toLong(), (count * 1000).toLong(), pendingIntent)
+            } else if (btn == "Stop") {
+                btnStart.text = "Start"
+                unregisterReceiver(AlarmReceiver())
             } else {
                 Log.i("error", "can't have empty fields")
             }
