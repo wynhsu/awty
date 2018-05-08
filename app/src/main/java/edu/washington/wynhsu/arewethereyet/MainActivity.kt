@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
                 val btn = btnStart.text.toString()
                 btnStart.text = "Stop"
                 val msg = txtMsg.text.toString()
-                val numb = txtPhone.text.toString()
+                val numb = format(txtPhone.text.toString())
                 val count = txtMin.text.toString().toInt()
                 val toast = "$numb: $msg"
 
@@ -37,10 +37,10 @@ class MainActivity : AppCompatActivity() {
                 val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
                 if (btn == "Start") {
+                    sendBroadcast(intent)
                     alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             SystemClock.elapsedRealtime() + (count * 1000).toLong(),
                             (count * 1000).toLong(), pendingIntent)
-//                    sendBroadcast(intent)
                 } else {
                     btnStart.text = "Start"
                     alarmManager.cancel(pendingIntent)
@@ -52,16 +52,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(AlarmReceiver())
-    }
-
     fun validate(): Boolean{
         val msg = txtMsg.text.toString()
         val numb = txtPhone.text.toString()
         val count = txtMin.toString()
         return (msg != "" && numb != "" && count != "")
+    }
+
+    fun format(s: String): String {
+        val onethree = s.substring(0, 3)
+        val foursix = s.substring(3, 6)
+        val seventen = s.substring(6, s.length)
+        return "($onethree) $foursix-$seventen"
     }
 }
 
