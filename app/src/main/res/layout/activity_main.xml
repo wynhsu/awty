@@ -30,7 +30,7 @@
         android:ems="10"
         android:hint="Phone Number"
         android:inputType="textPersonName"
-        android:digits="0123456789()- "
+        android:digits="0123456789()-+ "
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtMsg" />
@@ -45,7 +45,7 @@
         android:ems="10"
         android:hint="Minutes"
         android:inputType="textPersonName"
-        android:digits="0123456789."
+        android:digits="0123456789"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtPhone" />

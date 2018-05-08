@@ -20,47 +20,55 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         btnStart.setOnClickListener {
-            val btn = btnStart.text
-            if (validate() && btn == "Start") {
+            if (validate()) {
+                val btn = btnStart.text.toString()
                 btnStart.text = "Stop"
-                val msg = txtMsg.text
-                val numb = txtPhone.text
-                val count = txtMin.text.toString().toDouble()
-                val toast = numb.toString() + ": " + msg
+                val msg = txtMsg.text.toString()
+                val numb = txtPhone.text.toString()
+                val count = txtMin.text.toString().toInt()
+                val toast = "$numb: $msg"
 
                 val intent = Intent("edu.washington.wynhsu.arewethereyet").apply {
                     putExtra("message", toast)
                 }
-                val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
-
-                sendBroadcast(intent)
-
                 val intentFilter = IntentFilter("edu.washington.wynhsu.arewethereyet")
                 registerReceiver(AlarmReceiver(), intentFilter)
-
+                val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
                 val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + (count * 1000).toLong(), (count * 1000).toLong(), pendingIntent)
-            } else if (btn == "Stop") {
-                btnStart.text = "Start"
-                unregisterReceiver(AlarmReceiver())
+
+                if (btn == "Start") {
+                    alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime() + (count * 1000).toLong(),
+                            (count * 1000).toLong(), pendingIntent)
+//                    sendBroadcast(intent)
+                } else {
+                    btnStart.text = "Start"
+                    alarmManager.cancel(pendingIntent)
+                }
             } else {
+                Toast.makeText(this, "Can't have empty fields!", Toast.LENGTH_SHORT).show()
                 Log.i("error", "can't have empty fields")
             }
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(AlarmReceiver())
+    }
+
     fun validate(): Boolean{
-        val msg = txtMsg.text
-        val numb = txtPhone.text
-        val count = txtMin
-        return (msg.toString() != "" && numb.toString() != "" && count.toString() != "")
+        val msg = txtMsg.text.toString()
+        val numb = txtPhone.text.toString()
+        val count = txtMin.toString()
+        return (msg != "" && numb != "" && count != "")
     }
 }
 
-class AlarmReceiver(): BroadcastReceiver() {
+class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val msg = intent!!.getStringExtra("message")
+        Log.i("alarm call", "$msg")
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-
     }
 }

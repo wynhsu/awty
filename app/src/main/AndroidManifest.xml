@@ -12,11 +12,11 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <action android:name="edu.washington.wynhsu.arewethereyet" />
+                <!--<action android:name="edu.washington.wynhsu.arewethereyet" />-->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".AlarmReceiver" />
+        <!--<receiver android:name=".AlarmReceiver" />-->
     </application>
 
 </manifest>
