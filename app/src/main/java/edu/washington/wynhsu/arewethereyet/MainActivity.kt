@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(AlarmReceiver())
     }
 
-    fun validate(): Boolean{
+    private fun validate(): Boolean{
         val msg = txtMsg.text.toString()
         val numb = txtPhone.text.toString()
         val count = txtMin.toString()
@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val msg = intent!!.getStringExtra("message")
-        Log.i("alarm call", "$msg")
+        Log.i("alarm call", msg)
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
 }
