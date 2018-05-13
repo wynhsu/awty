@@ -5,10 +5,15 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_VIEW
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.SystemClock
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
+import android.telephony.SmsManager
 import android.util.Log
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
@@ -19,6 +24,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        permissions()
         btnStart.setOnClickListener {
             if (validate()) {
                 val btn = btnStart.text.toString()
@@ -26,13 +32,10 @@ class MainActivity : AppCompatActivity() {
                 val msg = txtMsg.text.toString()
                 val numb = txtPhone.text.toString()
                 val count = txtMin.text.toString().toInt()
-                val toast = "$numb: $msg"
 
-                val intent = Intent("edu.washington.wynhsu.arewethereyet").apply {
-                    putExtra("message", toast)
-                }
+                val intent = Intent("edu.washington.wynhsu.arewethereyet").putExtra("message", msg)
                 val intentFilter = IntentFilter("edu.washington.wynhsu.arewethereyet")
-                registerReceiver(AlarmReceiver(), intentFilter)
+                registerReceiver(AlarmReceiver(numb), intentFilter)
                 val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
                 val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -40,10 +43,10 @@ class MainActivity : AppCompatActivity() {
                     alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                             SystemClock.elapsedRealtime() + (count * 1000).toLong(),
                             (count * 1000).toLong(), pendingIntent)
-//                    sendBroadcast(intent)
                 } else {
                     btnStart.text = "Start"
                     alarmManager.cancel(pendingIntent)
+                    unregisterReceiver(AlarmReceiver(numb))
                 }
             } else {
                 Toast.makeText(this, "Can't have empty fields!", Toast.LENGTH_SHORT).show()
@@ -54,7 +57,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(AlarmReceiver())
+        unregisterReceiver(AlarmReceiver(""))
     }
 
     private fun validate(): Boolean{
@@ -63,12 +66,21 @@ class MainActivity : AppCompatActivity() {
         val count = txtMin.toString()
         return (msg != "" && numb != "" && count != "")
     }
+
+    private fun permissions() {
+        val permission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS)
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.SEND_SMS), 0)
+        }
+    }
 }
 
-class AlarmReceiver : BroadcastReceiver() {
+class AlarmReceiver(private val phone: String) : BroadcastReceiver() {
+    private val sms = SmsManager.getDefault()
     override fun onReceive(context: Context?, intent: Intent?) {
         val msg = intent!!.getStringExtra("message")
+        sms.sendTextMessage(phone, null, msg, null, null)
+        Toast.makeText(context, "$phone: $msg", Toast.LENGTH_SHORT).show()
         Log.i("alarm call", msg)
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
 }
