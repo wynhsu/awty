@@ -19,23 +19,30 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+    lateinit var phone: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         permissions()
+    }
+
+    override fun onResume() {
+        super.onResume()
         btnStart.setOnClickListener {
             if (validate()) {
                 val btn = btnStart.text.toString()
                 btnStart.text = "Stop"
                 val msg = txtMsg.text.toString()
-                val numb = txtPhone.text.toString()
+                phone = txtPhone.text.toString()
                 val count = txtMin.text.toString().toInt()
 
-                val intent = Intent("edu.washington.wynhsu.arewethereyet").putExtra("message", msg)
+                val intent = Intent("edu.washington.wynhsu.arewethereyet").apply {
+                    removeExtra("message")
+                    putExtra("message", msg)
+                }
                 val intentFilter = IntentFilter("edu.washington.wynhsu.arewethereyet")
-                registerReceiver(AlarmReceiver(numb), intentFilter)
+                registerReceiver(AlarmReceiver(phone), intentFilter)
                 val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
                 val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -46,18 +53,17 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     btnStart.text = "Start"
                     alarmManager.cancel(pendingIntent)
-                    unregisterReceiver(AlarmReceiver(numb))
+//                    Log.i("end", "canceled")
                 }
             } else {
                 Toast.makeText(this, "Can't have empty fields!", Toast.LENGTH_SHORT).show()
-                Log.i("error", "can't have empty fields")
             }
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(AlarmReceiver(""))
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(AlarmReceiver(phone))
     }
 
     private fun validate(): Boolean{
@@ -81,6 +87,6 @@ class AlarmReceiver(private val phone: String) : BroadcastReceiver() {
         val msg = intent!!.getStringExtra("message")
         sms.sendTextMessage(phone, null, msg, null, null)
         Toast.makeText(context, "$phone: $msg", Toast.LENGTH_SHORT).show()
-        Log.i("alarm call", msg)
+//        Log.i("alarm call", msg)
     }
 }
